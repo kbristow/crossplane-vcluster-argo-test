@@ -1,0 +1,30 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: vcluster-to-argocd-cluster
+spec:
+  generateExisting: true
+  rules:
+  - name: vcluster-kubeconfigs
+    match:
+      any:
+      - resources:
+          kinds:
+          - Secret
+          names:
+          - vcluster-kubeconfig
+    generate:
+      synchronize: true
+      apiVersion: v1
+      kind: Secret
+      name: "vcluster-{{request.object.metadata.namespace}}"
+      namespace: "argocd"
+      data:
+        kind: Secret
+        metadata:
+          labels:
+            argocd.argoproj.io/secret-type: cluster
+        stringData:
+          name: "vcluster-{{request.object.metadata.namespace}}"
+          server: "https://{{request.object.metadata.namespace}}-vcluster.{{request.object.metadata.namespace}}.svc.cluster.local"
+          config: '{ "username": "my-vcluster", "tlsClientConfig":{ "insecure": false, "caData": "{{ request.object.data."certificate-authority"}}","certData": "{{ request.object.data."client-certificate" }}","keyData": "{{ request.object.data."client-key" }}"}}'

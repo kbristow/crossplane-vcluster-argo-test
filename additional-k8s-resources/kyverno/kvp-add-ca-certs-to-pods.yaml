@@ -1,0 +1,32 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: add-ca-certs-to-pods
+spec:
+  rules:
+    - name: add-ca-certs-to-pods
+      match:
+        any:
+        - resources:
+            kinds: 
+            - Pod
+            names: 
+            - "crossplane-provider-helm-*"
+            operations:
+            - CREATE
+      mutate:
+        patchStrategicMerge:
+          spec:
+            containers:
+              # match provider-helm container
+              - (name): "provider-helm"
+                # add volume mount
+                volumeMounts:
+                  - name: "zscaler-root-ca"
+                    mountPath: "/etc/ssl/certs/ca-bundle.crt"
+                    subPath: "zscaler-root-ca.crt"
+            volumes:
+              - name: "zscaler-root-ca"
+                secret:
+                  secretName: "zscaler-root-ca"
+                  defaultMode: 420
