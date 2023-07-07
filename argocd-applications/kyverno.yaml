@@ -7,12 +7,18 @@ spec:
     namespace: kyverno
     server: https://kubernetes.default.svc
   project: default
-  source:
-    chart: kyverno
-    helm:
-      releaseName: kyverno
-    repoURL: https://kyverno.github.io/kyverno/
-    targetRevision: 3.0.2
+  sources:
+    - chart: kyverno
+      helm:
+        releaseName: kyverno
+      repoURL: https://kyverno.github.io/kyverno/
+      targetRevision: 3.0.2
+    - directory:
+        recurse: true
+        include: '*.yaml'
+      repoURL: https://github.com/kbristow/crossplane-vcluster-argo-test
+      targetRevision: HEAD
+      path: additional-k8s-resources/kyverno
   syncPolicy:
     automated:
       selfHeal: true
