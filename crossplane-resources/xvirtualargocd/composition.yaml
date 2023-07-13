@@ -155,9 +155,9 @@ spec:
       - type: string
         string:
           fmt: "argocd-%s"
-    - type: FromCompositeFieldPath
-      fromFieldPath: spec.argocd.values
-      toFieldPath: spec.forProvider.manifest.spec.source.helm.values
+    # - type: FromCompositeFieldPath
+    #   fromFieldPath: spec.argocd.values
+    #   toFieldPath: spec.forProvider.manifest.spec.source.helm.values
     - type: FromCompositeFieldPath
       fromFieldPath: metadata.name
       toFieldPath: spec.forProvider.manifest.spec.destination.name
