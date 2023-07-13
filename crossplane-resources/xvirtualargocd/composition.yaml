@@ -112,7 +112,6 @@ spec:
       metadata:
         name: foo
       spec:
-        managementPolicy: ObserveDelete
         forProvider:
           manifest:
             apiVersion: argoproj.io/v1alpha1
