@@ -31,9 +31,8 @@ spec:
                 type: object
                 properties:
                   values:
-                    x-kubernetes-preserve-unknown-fields: true
                     description: Values for vcluster Helm chart
-                    type: object
+                    type: string
             # required:
             # - vcluster-values
           status:

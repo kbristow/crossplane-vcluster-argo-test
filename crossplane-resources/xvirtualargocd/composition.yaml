@@ -105,22 +105,41 @@ spec:
     - type: ToCompositeFieldPath
       fromFieldPath: metadata.name
       toFieldPath: status.vcluster.helmProviderName
-
-  - name: argocd-on-vcluster
+  - name: argocd-app
     base:
-      apiVersion: helm.crossplane.io/v1beta1
-      kind: Release
+      apiVersion: kubernetes.crossplane.io/v1alpha1
+      kind: Object
       metadata:
-        name: vcluster-test-argocd
+        name: foo
       spec:
-        providerConfigRef:
-          name: vcluster-test-helm-provider
+        managementPolicy: ObserveDelete
         forProvider:
-          chart:
-            name: argo-cd
-            repository: https://argoproj.github.io/argo-helm
-            version: 5.21.0
-          namespace: argocd
+          manifest:
+            apiVersion: argoproj.io/v1alpha1
+            kind: Application
+            metadata:
+              name: argocd
+              namespace: argocd
+            spec:
+              destination:
+                namespace: argocd
+                name: vcluster
+              project: default
+              source:
+                chart: argo-cd
+                helm:
+                  releaseName: argocd
+                repoURL: https://argoproj.github.io/argo-helm
+                targetRevision: 5.21.0
+              syncPolicy:
+                automated:
+                  selfHeal: true
+                  prune: true
+                syncOptions:
+                  - CreateNamespace=true
+                  - ServerSideApply=true
+        providerConfigRef:
+          name: kubernetes-provider
     patches:
     - type: FromCompositeFieldPath
       fromFieldPath: metadata.name
@@ -128,14 +147,47 @@ spec:
       transforms:
       - type: string
         string:
-          fmt: "%s-argocd"
-    - type: FromCompositeFieldPath
-      fromFieldPath: status.vcluster.helmProviderName
-      toFieldPath: spec.providerConfigRef.name
+          fmt: "argocd-%s"
     - type: FromCompositeFieldPath
       fromFieldPath: spec.argocd.values
-      toFieldPath: spec.forProvider.values
-      policy:
-        mergeOptions:
-          appendSlice: true
-          keepMapValues: true
+      toFieldPath: spec.source.helm.values
+    - type: FromCompositeFieldPath
+      fromFieldPath: metadata.name
+      toFieldPath: spec.destination.name
+      transforms:
+      - type: string
+        string:
+          fmt: "vcluster-%s"
+  # - name: argocd-on-vcluster
+  #   base:
+  #     apiVersion: helm.crossplane.io/v1beta1
+  #     kind: Release
+  #     metadata:
+  #       name: vcluster-test-argocd
+  #     spec:
+  #       providerConfigRef:
+  #         name: vcluster-test-helm-provider
+  #       forProvider:
+  #         chart:
+  #           name: argo-cd
+  #           repository: https://argoproj.github.io/argo-helm
+  #           version: 5.21.0
+  #         namespace: argocd
+  #   patches:
+  #   - type: FromCompositeFieldPath
+  #     fromFieldPath: metadata.name
+  #     toFieldPath: metadata.name
+  #     transforms:
+  #     - type: string
+  #       string:
+  #         fmt: "%s-argocd"
+  #   - type: FromCompositeFieldPath
+  #     fromFieldPath: status.vcluster.helmProviderName
+  #     toFieldPath: spec.providerConfigRef.name
+  #   - type: FromCompositeFieldPath
+  #     fromFieldPath: spec.argocd.values
+  #     toFieldPath: spec.forProvider.values
+  #     policy:
+  #       mergeOptions:
+  #         appendSlice: true
+  #         keepMapValues: true
