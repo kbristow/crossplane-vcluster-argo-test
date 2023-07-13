@@ -4,4 +4,4 @@ metadata:
   name: customer1
 spec:
   argocd:
-    values: {}
+    values: ""
