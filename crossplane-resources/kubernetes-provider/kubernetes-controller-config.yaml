@@ -6,3 +6,5 @@ metadata:
     argocd.argoproj.io/sync-wave: "0"
 spec:
   serviceAccountName: kubernetes-provider-cluster-admin
+  args:
+    - --debug
